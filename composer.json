@@ -1,0 +1,8 @@
+{
+    "name": "rednose/cmis-phplib",
+    "description": "Mirror of Apache Chemistry PHPClient",
+    "license": "Apache-2.0",
+    "autoload":{
+        "files": ["vendor/rednose/cmis-phplib/cmis-lib.php"]
+    }
+}

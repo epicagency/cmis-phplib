@@ -508,9 +508,9 @@ class CMISRepositoryWrapper
         {
         	if ($pn->attributes) {
             $values = $pn->getElementsByTagName("value");
-            if($values->count() > 1) {
+            if($values->length > 1) {
               $nodeValues = [];
-              for($i = 0; $i < $values->count(); $i++) {
+              for($i = 0; $i < $values->length; $i++) {
                 $nodeValues[] = $values->item($i)->nodeValue;
               }
               $retval->properties[$pn->attributes->getNamedItem("propertyDefinitionId")->nodeValue] = $nodeValues;

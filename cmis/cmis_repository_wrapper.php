@@ -6,9 +6,9 @@
 # to you under the Apache License, Version 2.0 (the
 # "License"); you may not use this file except in compliance
 # with the License.  You may obtain a copy of the License at
-# 
+#
 # http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing,
 # software distributed under the License is distributed on an
 # "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -61,49 +61,49 @@ class CMISRepositoryWrapper
     // Only Handles Basic Auth
     // Very Little Error Checking
     // Does not work against pre CMIS 1.0 Repos
-    
-    
+
+
     /**
      * @internal
      */
     var $url;
-    
+
     /**
      * @internal
      */
     var $username;
-    
+
     /**
      * @internal
      */
     var $password;
-    
+
     /**
      * @internal
      */
     var $authenticated;
-    
+
     /**
      * @internal
      */
     var $workspace;
-    
+
     /**
      * @internal
      */
     var $last_request;
-    
+
     /**
      * @internal
      */
     var $do_not_urlencode;
-    
+
     /**
      * @internal
      */
     protected $_addlCurlOptions = array();
-    
-    
+
+
     /**
      * @internal
      */
@@ -112,7 +112,7 @@ class CMISRepositoryWrapper
         "cmisra" => "http://docs.oasis-open.org/ns/cmis/restatom/200908/",
         "atom" => "http://www.w3.org/2005/Atom",
         "app" => "http://www.w3.org/2007/app",
-        
+
     );
 
 	/**
@@ -124,7 +124,7 @@ class CMISRepositoryWrapper
             $this->do_not_urlencode=true;
         }
         $this->_addlCurlOptions = $addlCurlOptions; // additional cURL options
-        
+
         $this->connect($url, $username, $password, $options);
     }
 	/**
@@ -138,7 +138,7 @@ class CMISRepositoryWrapper
 		} else {
 			return($prop);
 		}
-		    	
+
     }
 
 	/**
@@ -155,7 +155,7 @@ class CMISRepositoryWrapper
             return $url;
         }
     }
-    
+
 	/**
 	 * @internal
 	 */
@@ -282,7 +282,7 @@ class CMISRepositoryWrapper
         {
             curl_setopt($session, CURLOPT_POST, true);
         }
-        
+
         // apply addl. cURL options
         // WARNING: this may override previously set options
         if (count($this->_addlCurlOptions)) {
@@ -290,8 +290,8 @@ class CMISRepositoryWrapper
                 curl_setopt($session, $key, $value);
             }
         }
-        
-        
+
+
         //TODO: Make this storage optional
         $retval = new stdClass();
         $retval->url = $url;
@@ -358,7 +358,7 @@ class CMISRepositoryWrapper
 	 */
     static function processTemplate($template, $values = array ())
     {
-        // Fill in the blanks -- 
+        // Fill in the blanks --
         $retval = $template;
         if (is_array($values))
         {
@@ -498,20 +498,29 @@ class CMISRepositoryWrapper
 	            $renditionArray[$i][$rend->localName] = $rend->nodeValue;
               }
             }
-            $i++;        
+            $i++;
 	      }
 		}
 		$retval->renditions = $renditionArray;
-        
+
         $prop_nodes = $xmlnode->getElementsByTagName("object")->item(0)->getElementsByTagName("properties")->item(0)->childNodes;
         foreach ($prop_nodes as $pn)
         {
         	if ($pn->attributes) {
-				//supressing errors since PHP sometimes sees DOM elements as "non-objects"
-				@$retval->properties[$pn->attributes->getNamedItem("propertyDefinitionId")->nodeValue] = $pn->getElementsByTagName("value")->item(0)->nodeValue;
-			}
+            $values = $pn->getElementsByTagName("value");
+            if($values->count() > 1) {
+              $nodeValues = [];
+              for($i = 0; $i < $values->count(); $i++) {
+                $nodeValues[] = $values->item($i)->nodeValue;
+              }
+              $retval->properties[$pn->attributes->getNamedItem("propertyDefinitionId")->nodeValue] = $nodeValues;
+            } else {
+              //supressing errors since PHP sometimes sees DOM elements as "non-objects"
+              @$retval->properties[$pn->attributes->getNamedItem("propertyDefinitionId")->nodeValue] = $pn->getElementsByTagName("value")->item(0)->nodeValue;
+            }
+          }
         }
-        
+
         $retval->uuid = $xmlnode->getElementsByTagName("id")->item(0)->nodeValue;
         $retval->id = $retval->properties["cmis:objectId"];
         //TODO: RRM FIX THIS
@@ -532,7 +541,7 @@ class CMISRepositoryWrapper
 		$retval->allowableActions = CMISRepositoryWrapper :: extractAllowableActionsFromNode($xmlnode);
         return $retval;
     }
-    
+
 	/**
 	 * @internal
 	 */
@@ -570,7 +579,7 @@ class CMISRepositoryWrapper
                 $retval->properties[$id] = array (
                     "cmis:propertyType" => $propertyType,
                     "cmis:cardinality" => $cardinality,
-                    
+
                 );
             } else
             {
@@ -595,10 +604,10 @@ class CMISRepositoryWrapper
         }
 
         /*
-         * 
-        
-        
-        
+         *
+
+
+
         		$prop_nodes = $xmlnode->getElementsByTagName("object")->item(0)->getElementsByTagName("properties")->item(0)->childNodes;
         		foreach ($prop_nodes as $pn) {
         			if ($pn->attributes) {
@@ -629,7 +638,7 @@ class CMISRepositoryWrapper
     {
         // Process a feed and extract the objects
         //   Does not handle hierarchy
-        //   Provides two arrays 
+        //   Provides two arrays
         //   -- one sequential array (a list)
         //   -- one hash table indexed by objectID
         //   and a property "numItems" that holds the total number of items available.
@@ -637,7 +646,7 @@ class CMISRepositoryWrapper
         // extract total number of items
         $numItemsNode = CMISRepositoryWrapper::doXQueryFromNode($xmlnode, "/atom:feed/cmisra:numItems");
         $retval->numItems = $numItemsNode->length ? (int) $numItemsNode->item(0)->nodeValue : -1; // set to negative value if info is not available
-                
+
         $retval->objectList = array ();
         $retval->objectsById = array ();
         $result = CMISRepositoryWrapper :: doXQueryFromNode($xmlnode, "/atom:feed/atom:entry");
@@ -668,7 +677,7 @@ class CMISRepositoryWrapper
     {
         // Process a feed and extract the objects
         //   Does not handle hierarchy
-        //   Provides two arrays 
+        //   Provides two arrays
         //   -- one sequential array (a list)
         //   -- one hash table indexed by objectID
         $retval = new stdClass();

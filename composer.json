@@ -1,6 +1,6 @@
 {
-    "name": "rednose/cmis-phplib",
-    "description": "Mirror of Apache Chemistry PHPClient",
+    "name": "epicagency/cmis-phplib",
+    "description": "Forked from rednose/cmis-phplib",
     "license": "Apache-2.0",
     "autoload":{
         "files": ["cmis-lib.php"]
